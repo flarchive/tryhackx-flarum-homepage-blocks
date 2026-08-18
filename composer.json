@@ -1,0 +1,63 @@
+{
+    "name": "tryhackx/flarum-homepage-blocks",
+    "description": "Customizable homepage blocks for tracker-style Flarum forums featuring dual statistics (internal & OpenTracker), advanced filters, and rate-limiting protection.",
+    "keywords": [
+        "flarum",
+        "extension",
+        "tracker",
+        "statistics",
+        "opentracker",
+        "antispam",
+        "rate-limiting",
+        "validation",
+        "title-length",
+        "content-length",
+        "search",
+        "filtering",
+        "sorting",
+        "widgets",
+        "homepage",
+        "blocks"
+    ],
+    "type": "flarum-extension",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "TryHackX",
+            "email": "contact@tryhackx.org",
+            "homepage": "https://github.com/TryHackX"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/TryHackX/flarum-homepage-blocks/issues",
+        "source": "https://github.com/TryHackX/flarum-homepage-blocks"
+    },
+    "require": {
+        "php": "^8.3",
+        "flarum/core": "^2.0.0-rc.1",
+        "flarum/tags": "^2.0.0-rc.1"
+    },
+    "suggest": {
+        "fof/discussion-views": "For view count stats",
+        "tryhackx/flarum-topic-rating": "For rating-based filtering and sorting",
+        "tryhackx/flarum-magnet-link": "For magnet link stats"
+    },
+    "autoload": {
+        "psr-4": {
+            "TryHackX\\HomepageBlocks\\": "src/"
+        }
+    },
+    "extra": {
+        "flarum-extension": {
+            "title": "TryHackX Homepage Blocks",
+            "category": "feature",
+            "icon": {
+                "name": "fas fa-home",
+                "color": "#e74c3c",
+                "backgroundColor": "#1a1a2e"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
