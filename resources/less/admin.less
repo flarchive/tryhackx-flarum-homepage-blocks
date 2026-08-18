@@ -1,0 +1,511 @@
+// TryHackX Homepage Blocks - Admin Styles
+
+.tryhackx-homepage-blocks-settings {
+    textarea.FormControl {
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 12px;
+        min-height: 80px;
+    }
+}
+
+// Section headers in settings
+.HomepageBlocks-sectionHeader {
+    border-top: 2px solid #444;
+    padding-top: 15px;
+    margin-top: 20px;
+
+    h3 {
+        margin: 0 0 5px 0;
+        font-size: 16px;
+        color: #fff;
+    }
+}
+
+// Length settings (title/content min/max)
+.HomepageBlocks-lengthGroup {
+    transition: opacity 0.2s;
+}
+
+.HomepageBlocks-lengthRow {
+    display: inline-flex;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.HomepageBlocks-lengthField {
+    width: 180px;
+}
+
+.HomepageBlocks-lengthDefault {
+    margin-bottom: 1px;
+}
+
+// Points-based rate limiting settings
+.HomepageBlocks-pointsGroup {
+    transition: opacity 0.2s;
+
+    &.is-disabled {
+        opacity: 0.5;
+    }
+}
+
+.HomepageBlocks-pointsHeading {
+    margin: 18px 0 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.HomepageBlocks-pointsRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    // Keep the block compact instead of stretching across very wide admin panels.
+    max-width: 760px;
+    margin-bottom: 4px;
+}
+
+.HomepageBlocks-pointsField {
+    width: 224px;
+    flex: 0 0 auto;
+
+    > label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .FormControl {
+        width: 100%;
+    }
+
+    .helpText {
+        margin-top: 4px;
+    }
+}
+
+// Custom links editor — a single table, one link per row (headers shown once)
+.HomepageBlocks-linksEditor {
+    margin-top: 8px;
+    max-width: 760px;
+}
+
+.HomepageBlocks-linksTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+
+    th {
+        text-align: left;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--muted-color);
+        padding: 2px 8px 6px 0;
+    }
+
+    td {
+        padding: 3px 8px 3px 0;
+        vertical-align: middle;
+    }
+
+    th.col-actions,
+    td.col-actions {
+        padding-right: 0;
+        text-align: right;
+    }
+
+    // Narrow columns shrink to their content.
+    .col-color,
+    .col-newtab,
+    .col-actions {
+        width: 1%;
+        white-space: nowrap;
+    }
+
+    .FormControl {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .col-name .FormControl { min-width: 90px; }
+    .col-url .FormControl { min-width: 150px; }
+    .col-class .FormControl { min-width: 100px; }
+
+    input[type='color'] {
+        width: 36px;
+        height: 32px;
+        padding: 2px;
+        border: 1px solid var(--control-bg);
+        border-radius: 4px;
+        background: var(--control-bg);
+        cursor: pointer;
+        vertical-align: middle;
+    }
+
+    input[type='checkbox'] {
+        margin: 0;
+    }
+}
+
+.HomepageBlocks-linkRow-actions {
+    display: inline-flex;
+    gap: 3px;
+    white-space: nowrap;
+}
+
+.HomepageBlocks-linksAdd {
+    margin-top: 2px;
+}
+
+.HomepageBlocks-support {
+    text-align: center;
+
+    .Button .icon {
+        color: #e74c3c;
+    }
+}
+
+.SupportModal .Modal-body {
+    padding: 20px 24px;
+}
+
+.SupportModal-description {
+    color: var(--muted-color);
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0 0 20px;
+    text-align: center;
+}
+
+.SupportModal-wallets {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.SupportModal-wallet {
+    border: 1px solid var(--control-bg);
+    border-radius: 8px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.SupportModal-walletHeader {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 8px;
+
+    i {
+        font-size: 18px;
+    }
+}
+
+.SupportModal-walletAddress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    code {
+        flex: 1;
+        font-size: 11px;
+        padding: 6px 10px;
+        background: var(--control-bg);
+        border-radius: 4px;
+        word-break: break-all;
+        line-height: 1.4;
+        font-family: 'Fira Code', 'Consolas', monospace;
+        user-select: all;
+    }
+}
+
+.SupportModal-copyBtn {
+    flex-shrink: 0;
+    min-width: 34px;
+    min-height: 34px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background 0.2s, color 0.2s;
+
+    &--copied {
+        color: #2e7d32 !important;
+        background: rgba(46, 125, 50, 0.12) !important;
+    }
+}
+
+.SupportModal-thanks {
+    text-align: center;
+    color: var(--muted-color);
+    font-size: 13px;
+    margin: 16px 0 0;
+    font-style: italic;
+}
+
+// Tracker whitelist sync: toggle-reveal group (animated), secret row, test/scan actions, progress bar
+.HomepageBlocks-whitelistGroup {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    margin: 0;
+    transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.25s ease;
+
+    &.is-open {
+        max-height: 1400px;
+        opacity: 1;
+        margin-bottom: 15px;
+    }
+}
+
+.HomepageBlocks-whitelistInner {
+    padding: 4px 0 0;
+    max-width: 780px; // keep the fields and their help texts readable on wide admin layouts
+}
+
+.HomepageBlocks-whitelistStack {
+    display: block;
+
+    .HomepageBlocks-whitelistField {
+        margin-bottom: 12px;
+    }
+
+    .HomepageBlocks-whitelistTrackerHosts {
+        max-width: 480px;
+    }
+}
+
+.HomepageBlocks-whitelistField {
+    margin-bottom: 14px;
+
+    &--small {
+        width: 285px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 4px;
+    }
+}
+
+.HomepageBlocks-whitelistRow {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.HomepageBlocks-whitelistSecretRow {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+
+    .FormControl {
+        flex: 1;
+        min-width: 200px;
+    }
+}
+
+.HomepageBlocks-whitelistActions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 10px 0 4px;
+}
+
+.HomepageBlocks-whitelistTestResult {
+    font-size: 13px;
+}
+
+.HomepageBlocks-whitelistScan {
+    margin-top: 12px;
+    border-top: 1px dashed #444;
+    padding-top: 8px;
+}
+
+.HomepageBlocks-progress {
+    margin: 8px 0;
+}
+
+.HomepageBlocks-progressBar {
+    height: 8px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.HomepageBlocks-progressFill {
+    height: 100%;
+    background: #4a9eff;
+    transition: width 0.3s ease;
+
+    &.is-done {
+        background: #4caf50;
+    }
+
+    &.is-error {
+        background: #f44336;
+    }
+}
+
+.HomepageBlocks-progressText {
+    font-size: 12px;
+    color: #bbb;
+    margin-top: 4px;
+}
+
+.HomepageBlocks-ok {
+    color: #4caf50;
+}
+
+.HomepageBlocks-warn {
+    color: #ffb74d;
+}
+
+.HomepageBlocks-err {
+    color: #ff5252;
+}
+
+// ──────────── Phones (Flarum's @phone breakpoint) ────────────
+// Everything stacks full-width, nothing may overflow to the right, selects match the
+// height of text inputs, and action buttons are centred / full-width.
+@media (max-width: 767px) {
+    // Overflow guard for every custom group rendered by the extension.
+    .HomepageBlocks-lengthGroup,
+    .HomepageBlocks-pointsGroup,
+    .HomepageBlocks-linksEditor,
+    .HomepageBlocks-whitelistGroup,
+    .HomepageBlocks-whitelistInner {
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    // Selects rendered by the extension get the same box as Flarum's text inputs
+    // (36px tall) instead of the browser's default, shorter select.
+    .HomepageBlocks-pointsField select.FormControl,
+    .HomepageBlocks-lengthField select.FormControl,
+    .HomepageBlocks-whitelistField select.FormControl,
+    .tryhackx-homepage-blocks-Page select.FormControl,
+    .tryhackx-homepage-blocks-settings select.FormControl {
+        height: 36px;
+        min-height: 36px;
+        padding-top: 0;
+        padding-bottom: 0;
+        line-height: 34px;
+        box-sizing: border-box;
+    }
+
+    // Title / content length rows: min, max and the "restore defaults" button stack.
+    .HomepageBlocks-lengthRow {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .HomepageBlocks-lengthField {
+        width: 100%;
+
+        .FormControl {
+            width: 100%;
+            min-width: 0;
+        }
+    }
+
+    .HomepageBlocks-lengthDefault {
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+    // Points-based rate limiting: one field per line, full width.
+    .HomepageBlocks-pointsRow {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 12px;
+        max-width: none;
+    }
+
+    .HomepageBlocks-pointsField {
+        width: 100%;
+        flex: 1 1 auto;
+    }
+
+    // Custom links editor: let the table scroll inside its own box instead of the page.
+    .HomepageBlocks-linksEditor {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .HomepageBlocks-linksAdd {
+        width: 100%;
+    }
+
+    // Whitelist sync section
+    .HomepageBlocks-whitelistInner {
+        max-width: none;
+    }
+
+    .HomepageBlocks-whitelistField {
+        width: 100%;
+        min-width: 0;
+
+        &--small {
+            width: 100%;
+        }
+
+        .FormControl {
+            width: 100%;
+            min-width: 0;
+        }
+    }
+
+    .HomepageBlocks-whitelistStack .HomepageBlocks-whitelistTrackerHosts {
+        max-width: none;
+    }
+
+    .HomepageBlocks-whitelistRow {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    // Secret row: input takes the whole line, the buttons wrap below it and are centred.
+    .HomepageBlocks-whitelistSecretRow {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+
+        .FormControl {
+            flex: 1 1 100%;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .Button {
+            flex: 1 1 auto;
+            min-width: 120px;
+            text-align: center;
+        }
+    }
+
+    // Test connection / Scan / Cancel / Resume: full-width, centred buttons; result text below.
+    .HomepageBlocks-whitelistActions {
+        justify-content: center;
+        gap: 8px;
+
+        .Button {
+            width: 100%;
+            text-align: center;
+        }
+    }
+
+    .HomepageBlocks-whitelistTestResult {
+        flex: 1 1 100%;
+        text-align: center;
+    }
+}
