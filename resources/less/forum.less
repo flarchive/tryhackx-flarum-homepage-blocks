@@ -1,0 +1,799 @@
+// ========================================
+// TryHackX Homepage Blocks - Forum Styles
+// ========================================
+// Colours come in two layers of CSS custom properties:
+//
+//  1. Scheme (--hbs-*, on <html>): the forum's base colours for the active light
+//     or dark mode.
+//     - Theme mode "Auto" (default): Flarum 2's own theme variables, switched by
+//       the `data-theme="light|dark|light-hc|dark-hc"` attribute Flarum keeps on
+//       <html> — live, with the header theme switcher / user preference / OS.
+//     - "Light" / "Dark" (admin `theme_mode`): the JS puts HomepageBlocks--light
+//       or --dark on <html>, which pins the forum's light or dark palette (core's
+//       LESS variables, so still the forum's own colours).
+//  2. Style (--hb-*, on each .HomepageSection): what the rules below use.
+//     "Fitted" (default) blends into the forum; "Original" (admin `style`,
+//     .HomepageSection--original) is this extension's own card design — built
+//     from the same scheme tokens, so it follows light / dark too.
+
+@hb-shadow-soft: 0 1px 2px;
+
+// Text colour on the primary colour (YIQ, like core's root.less). Pre-computed:
+// core notes if() must not get nested parentheses.
+@hb-primary-yiq: red(@primary-color) * 299 + green(@primary-color) * 587 + blue(@primary-color) * 114;
+
+.hb-fixed-scheme(@body, @control, @heading, @text, @muted, @muted-more, @shadow) {
+    --hbs-body: @body;
+    --hbs-control: @control;
+    --hbs-mix: mix(@control, @body, 50%);
+    --hbs-heading: @heading;
+    --hbs-text: @text;
+    --hbs-muted: @muted;
+    --hbs-muted-more: @muted-more;
+    --hbs-shadow: @shadow;
+    --hbs-primary: @primary-color;
+    --hbs-button-color: if(@hb-primary-yiq >= 128000, @text-on-light, @text-on-dark);
+}
+
+// ── Scheme: auto, light (also the fallback until Flarum sets data-theme) ──
+:root,
+[data-theme^=light] {
+    --hbs-body: var(--body-bg, #fff);
+    --hbs-input: var(--body-bg, #fff);
+    --hbs-control: var(--control-bg, #e7edf3);
+    --hbs-control-hover: var(--control-bg-shaded, #dbe3ec);
+    --hbs-edge: var(--control-bg-shaded, #dbe3ec);
+    --hbs-mix: var(--control-body-bg-mix, #f3f6f9);
+    --hbs-heading: var(--heading-color, #111);
+    --hbs-text: var(--text-color, #111);
+    --hbs-muted: var(--muted-color, #667c99);
+    --hbs-muted-more: var(--muted-more-color, #aaa);
+    --hbs-shadow: var(--shadow-color, rgba(0, 0, 0, 0.35));
+    --hbs-primary: var(--primary-color, #536f90);
+    --hbs-button-color: var(--button-primary-color, #fff);
+    --hbs-toggle: #3b82f6;
+    --hbs-url: #2563eb;
+    --hbs-clear: #e74c3c;
+    --hbs-clear-hover: #c0392b;
+    --hbs-clear-rgb: 231, 76, 60;
+}
+
+// ── Scheme: auto, dark ──
+[data-theme^=dark] {
+    --hbs-body: var(--body-bg);
+    --hbs-input: var(--body-bg-shaded);
+    --hbs-control: var(--control-bg);
+    --hbs-control-hover: var(--control-bg-light);
+    --hbs-edge: var(--control-bg-light);
+    --hbs-mix: var(--control-body-bg-mix);
+    --hbs-heading: var(--heading-color);
+    --hbs-text: var(--text-color);
+    --hbs-muted: var(--muted-color);
+    --hbs-muted-more: var(--muted-more-color);
+    --hbs-shadow: var(--shadow-color);
+    --hbs-primary: var(--primary-color);
+    --hbs-button-color: var(--button-primary-color, #fff);
+    --hbs-toggle: #4a9eff;
+    --hbs-url: #7eb8da;
+    --hbs-clear: #ff6b6b;
+    --hbs-clear-hover: #ff4949;
+    --hbs-clear-rgb: 255, 107, 107;
+}
+
+// ── Scheme: forced "Light" (admin) — the forum's light palette ──
+html.HomepageBlocks--light {
+    .hb-fixed-scheme(@body-bg-light, @control-bg-light, @heading-color-light, @text-color-light,
+        @muted-color-light, @muted-more-color-light, @shadow-color-light);
+    --hbs-input: @body-bg-light;
+    --hbs-control-hover: darken(@control-bg-light, 4%);
+    --hbs-edge: darken(@control-bg-light, 4%);
+    --hbs-toggle: #3b82f6;
+    --hbs-url: #2563eb;
+    --hbs-clear: #e74c3c;
+    --hbs-clear-hover: #c0392b;
+    --hbs-clear-rgb: 231, 76, 60;
+}
+
+// ── Scheme: forced "Dark" (admin) — the forum's dark palette ──
+html.HomepageBlocks--dark {
+    .hb-fixed-scheme(@body-bg-dark, @control-bg-dark, @heading-color-dark, @text-color-dark,
+        @muted-color-dark, @muted-more-color-dark, @shadow-color-dark);
+    --hbs-input: darken(@body-bg-dark, 3%);
+    --hbs-control-hover: lighten(@control-bg-dark, 3%);
+    --hbs-edge: lighten(@control-bg-dark, 3%);
+    --hbs-toggle: #4a9eff;
+    --hbs-url: #7eb8da;
+    --hbs-clear: #ff6b6b;
+    --hbs-clear-hover: #ff4949;
+    --hbs-clear-rgb: 255, 107, 107;
+}
+
+// ── Style tokens: "Fitted" (default) — blends into the forum ──
+.HomepageSection {
+    --hb-accent: #e74c3c;
+    --hb-accent-hover: #c0392b;
+    --hb-accent-shadow: rgba(231, 76, 60, 0.2);
+    --hb-header-bg: var(--hbs-control);
+    --hb-header-hover: var(--hbs-control-hover);
+    --hb-border: var(--hbs-edge);
+    --hb-divider: var(--hbs-edge);
+    --hb-section-bg: var(--hbs-mix);
+    --hb-filter-bg: var(--hbs-mix);
+    --hb-input-bg: var(--hbs-input);
+    --hb-input-border: var(--hbs-edge);
+    --hb-text: var(--hbs-heading);
+    --hb-text-muted: var(--hbs-muted);
+    --hb-stat-value: var(--hbs-heading);
+    --hb-btn-text: var(--hbs-heading);
+    --hb-placeholder: var(--hbs-muted-more);
+    --hb-toggle: var(--hbs-toggle);
+    --hb-url: var(--hbs-url);
+    --hb-clear: var(--hbs-clear);
+    --hb-clear-hover: var(--hbs-clear-hover);
+    --hb-clear-rgb: var(--hbs-clear-rgb);
+}
+
+// ========================================
+// Collapsible Section
+// ========================================
+
+.HomepageSection {
+    margin-bottom: 2px;
+    border-radius: 4px;
+    overflow: hidden;
+
+    &-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 15px;
+        background: var(--hb-header-bg);
+        cursor: pointer;
+        user-select: none;
+        border-bottom: 1px solid var(--hb-border);
+        transition: background 0.2s ease;
+
+        &:hover {
+            background: var(--hb-header-hover);
+        }
+    }
+
+    &-title {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--hb-text);
+        letter-spacing: 0.5px;
+    }
+
+    &-toggle {
+        color: var(--hb-toggle);
+        font-size: 12px;
+        transition: transform 0.2s ease;
+    }
+
+    &-body {
+        background: var(--hb-section-bg);
+        border: 1px solid var(--hb-border);
+        border-top: none;
+        padding: 20px;
+    }
+
+    &--collapsed .HomepageSection-toggle {
+        transform: rotate(180deg);
+    }
+
+    &--listHeader {
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+}
+
+// ========================================
+// Homepage Main Block
+// ========================================
+
+.HomepageMainBlock {
+    &-divider {
+        height: 1px;
+        background: linear-gradient(to right, transparent, var(--hb-divider), transparent);
+        margin: 18px 0;
+    }
+
+    // Hide orphan dividers (when a component returns null despite passing config check)
+    &-divider:first-child,
+    &-divider:last-child,
+    &-divider + &-divider {
+        display: none;
+    }
+}
+
+// ========================================
+// Tracker Info
+// ========================================
+
+.TrackerInfo {
+    text-align: center;
+
+    &-message {
+        font-size: 14px;
+        color: var(--hb-text);
+    }
+
+    &-subMessage {
+        font-size: 11px;
+        color: var(--hb-text-muted);
+        margin-bottom: 8px;
+    }
+
+    &-urls {
+        margin-bottom: 12px;
+    }
+
+    &-url {
+        font-family: 'Consolas', 'Monaco', monospace;
+        font-size: 12px;
+        color: var(--hb-url);
+        padding: 2px 0;
+    }
+
+    &-copyBtn {
+        background: var(--hb-header-bg) !important;
+        color: var(--hb-btn-text) !important;
+        border: 1px solid var(--hb-border) !important;
+        padding: 8px 30px !important;
+        border-radius: 4px !important;
+        font-size: 13px;
+        transition: all 0.2s ease;
+
+        &:hover {
+            border-color: var(--hb-accent) !important;
+        }
+    }
+}
+
+// ========================================
+// Tracker Stats
+// ========================================
+
+.TrackerStats {
+    text-align: center;
+
+    &-title {
+        font-size: 14px;
+        color: var(--hb-text);
+    }
+
+    &-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: var(--hb-text-muted);
+        font-size: 13px;
+        padding: 10px 0;
+
+        .LoadingIndicator {
+            margin: 0;
+        }
+    }
+
+    &-error {
+        color: var(--hb-accent);
+        font-size: 13px;
+        padding: 10px 0;
+    }
+
+    &-grid {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        flex-wrap: wrap;
+        padding: 10px 0;
+    }
+
+    &-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        min-width: 84px;
+        // Zmieść dłuższe wartości (np. Uptime „365d 23h") bez rozpychania sąsiadów —
+        // element rośnie do treści, a cała siatka zawija się (flex-wrap) zamiast się
+        // wykrzaczać.
+        flex: 0 1 auto;
+
+        i {
+            font-size: 18px;
+            color: var(--hb-accent);
+            margin-bottom: 4px;
+        }
+    }
+
+    &-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--hb-stat-value);
+        // Wartość ma zostać w jednej linii (Uptime bywa szeroki) — zamiast łamać
+        // liczbę w połowie, to CAŁY kafelek zawinie się do kolejnego wiersza.
+        white-space: nowrap;
+    }
+
+    &-label {
+        font-size: 11px;
+        color: var(--hb-text-muted);
+        text-transform: uppercase;
+    }
+
+    &-sectionLabel {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--hb-text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin: 8px 0 4px;
+    }
+
+    &-divider {
+        height: 1px;
+        background: linear-gradient(to right, transparent, var(--hb-divider), transparent);
+        margin: 10px 40px;
+    }
+}
+
+// ========================================
+// Advanced Filters
+// ========================================
+
+.AdvancedFilters {
+    background: var(--hb-filter-bg);
+    border: 1px solid var(--hb-border);
+    border-top: none;
+    padding: 12px 15px;
+
+    &-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        align-items: flex-end;
+
+        & + & {
+            margin-top: 10px;
+        }
+    }
+
+    &-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 1;
+        min-width: 150px;
+
+        label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--hb-text-muted);
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .FormControl,
+        select {
+            background: var(--hb-input-bg);
+            border: 1px solid var(--hb-input-border);
+            color: var(--hb-text);
+            padding: 6px 10px;
+            font-size: 12px;
+            border-radius: 3px;
+            height: auto;
+            min-height: 32px;
+            transition: border-color 0.2s ease;
+
+            &:focus {
+                border-color: var(--hb-accent);
+                outline: none;
+                box-shadow: 0 0 0 2px var(--hb-accent-shadow);
+            }
+
+            &::placeholder {
+                color: var(--hb-placeholder);
+            }
+        }
+
+        .Select {
+            .Select-input {
+                background: var(--hb-input-bg);
+                border: 1px solid var(--hb-input-border);
+                color: var(--hb-text);
+                font-size: 12px;
+                border-radius: 3px;
+                min-height: 32px;
+            }
+        }
+
+        &--right {
+            margin-left: auto;
+            flex: none;
+            min-width: 120px;
+        }
+
+        // Category / Resolution while their live counts are being refreshed.
+        &--updating select {
+            opacity: 0.7;
+        }
+
+        select {
+            transition: border-color 0.2s ease, opacity 0.15s ease;
+        }
+    }
+
+    // Input wrapper for clear-X icon button
+    &-inputWrap {
+        position: relative;
+        width: 100%;
+
+        .AdvancedFilters-input {
+            width: 100%;
+            padding-right: 30px;
+
+            &.has-value {
+                padding-right: 32px;
+            }
+        }
+    }
+
+    // Red X glow clear button inside the text field
+    &-clear {
+        position: absolute;
+        top: 50%;
+        right: 6px;
+        transform: translateY(-50%);
+        width: 22px;
+        height: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: none;
+        background: transparent;
+        color: var(--hb-clear);
+        cursor: pointer;
+        border-radius: 50%;
+        font-size: 11px;
+        line-height: 1;
+        text-shadow: 0 0 4px ~"rgba(var(--hb-clear-rgb), 0.35)";
+        transition: color 0.15s ease, text-shadow 0.15s ease,
+                    background 0.15s ease, transform 0.05s ease;
+
+        i {
+            pointer-events: none;
+        }
+
+        &:hover {
+            color: var(--hb-clear-hover);
+            text-shadow:
+                0 0 6px ~"rgba(var(--hb-clear-rgb), 0.85)",
+                0 0 12px ~"rgba(var(--hb-clear-rgb), 0.55)",
+                0 0 20px ~"rgba(var(--hb-clear-rgb), 0.35)";
+            background: ~"rgba(var(--hb-clear-rgb), 0.12)";
+        }
+
+        &:active {
+            transform: translateY(-50%) scale(0.9);
+            background: ~"rgba(var(--hb-clear-rgb), 0.20)";
+            text-shadow:
+                0 0 8px ~"rgba(var(--hb-clear-rgb), 1)",
+                0 0 16px ~"rgba(var(--hb-clear-rgb), 0.75)",
+                0 0 26px ~"rgba(var(--hb-clear-rgb), 0.45)";
+        }
+
+        &:focus {
+            outline: none;
+        }
+    }
+}
+
+// ========================================
+// Style: "Original" — this extension's own card design
+// ========================================
+// Rounded cards with a soft shadow, a header tinted with the forum's primary
+// colour and an accent bar, round toggle, stat tiles with icon chips, pill-shaped
+// tracker URLs and inputs that light up in the primary colour on focus. Every
+// colour is mixed from the scheme tokens above (no fixed palette), so it fits any
+// Flarum 2 theme in light, dark and high-contrast mode.
+
+.HomepageSection--original {
+    --hbo-tint: ~"color-mix(in srgb, var(--hbs-primary) 10%, var(--hbs-body))";
+    --hbo-tint-strong: ~"color-mix(in srgb, var(--hbs-primary) 20%, var(--hbs-body))";
+    --hbo-tint-soft: ~"color-mix(in srgb, var(--hbs-primary) 5%, var(--hbs-body))";
+    --hbo-edge: ~"color-mix(in srgb, var(--hbs-primary) 22%, var(--hbs-edge))";
+    --hbo-edge-soft: ~"color-mix(in srgb, var(--hbs-primary) 12%, var(--hbs-edge))";
+    --hbo-ring: ~"color-mix(in srgb, var(--hbs-primary) 28%, transparent)";
+    --hbo-chip: ~"color-mix(in srgb, var(--hb-accent) 14%, transparent)";
+
+    --hb-section-bg: var(--hbs-body);
+    --hb-filter-bg: var(--hbs-body);
+    --hb-input-bg: var(--hbs-control);
+    --hb-input-border: transparent;
+    --hb-border: var(--hbo-edge);
+    --hb-divider: var(--hbo-edge);
+    --hb-toggle: var(--hbs-primary);
+    --hb-accent-shadow: var(--hbo-ring);
+
+    margin-bottom: 12px;
+    border: 1px solid var(--hbo-edge);
+    border-radius: 12px;
+    background: var(--hbs-body);
+    box-shadow: @hb-shadow-soft ~"color-mix(in srgb, var(--hbs-shadow) 35%, transparent)",
+        0 12px 28px -18px var(--hbs-shadow);
+
+    &.HomepageSection--listHeader {
+        margin-top: 8px;
+        margin-bottom: 12px;
+    }
+
+    .HomepageSection-header {
+        position: relative;
+        padding: 12px 16px 12px 20px;
+        background: linear-gradient(120deg, var(--hbo-tint-strong), var(--hbo-tint) 55%, var(--hbo-tint-soft));
+        border-bottom: 1px solid var(--hbo-edge-soft);
+        transition: background-color 0.2s ease, filter 0.2s ease;
+
+        // Accent bar in the forum's primary colour.
+        &::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            bottom: 10px;
+            left: 0;
+            width: 4px;
+            border-radius: 0 4px 4px 0;
+            background: var(--hbs-primary);
+        }
+
+        &:hover {
+            background: linear-gradient(120deg, var(--hbo-tint-strong), var(--hbo-tint-strong) 55%, var(--hbo-tint));
+        }
+    }
+
+    &.HomepageSection--collapsed .HomepageSection-header {
+        border-bottom-color: transparent;
+    }
+
+    .HomepageSection-title {
+        color: var(--hbs-heading);
+        font-size: 12px;
+        letter-spacing: 0.08em;
+    }
+
+    .HomepageSection-toggle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: var(--hbo-ring);
+        color: var(--hbs-primary);
+        font-size: 11px;
+    }
+
+    .HomepageSection-body {
+        border: none;
+        padding: 22px 20px;
+    }
+
+    .HomepageMainBlock-divider {
+        margin: 20px 0;
+    }
+
+    // Tracker info: URLs as monospace pills, copy button in the primary colour.
+    .TrackerInfo-url {
+        display: inline-block;
+        margin: 3px 0;
+        padding: 4px 12px;
+        border-radius: 999px;
+        background: var(--hbs-control);
+    }
+
+    .TrackerInfo-copyBtn {
+        background: var(--hbs-primary) !important;
+        color: var(--hbs-button-color) !important;
+        border: none !important;
+        border-radius: 999px !important;
+        padding: 8px 26px !important;
+        box-shadow: 0 6px 16px -10px var(--hbs-primary);
+
+        &:hover {
+            filter: brightness(1.08);
+        }
+    }
+
+    // Stats: tiles with an icon chip.
+    .TrackerStats-grid {
+        gap: 12px;
+    }
+
+    .TrackerStats-item {
+        min-width: 112px;
+        padding: 12px 14px 10px;
+        border: 1px solid var(--hbo-edge-soft);
+        border-radius: 12px;
+        background: var(--hbo-tint-soft);
+        transition: transform 0.15s ease, border-color 0.15s ease;
+
+        &:hover {
+            transform: translateY(-2px);
+            border-color: var(--hbo-edge);
+        }
+
+        i {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            margin-bottom: 6px;
+            border-radius: 50%;
+            background: var(--hbo-chip);
+            font-size: 15px;
+        }
+    }
+
+    .TrackerStats-label,
+    .TrackerStats-sectionLabel {
+        letter-spacing: 0.06em;
+    }
+
+    // Filters: soft filled inputs, primary focus ring.
+    .AdvancedFilters {
+        border: none;
+        padding: 14px 18px 18px;
+    }
+
+    .AdvancedFilters-field {
+        label {
+            font-size: 10.5px;
+            letter-spacing: 0.06em;
+        }
+
+        .FormControl,
+        select {
+            min-height: 34px;
+            border-radius: 8px;
+
+            &:hover {
+                border-color: var(--hbo-edge-soft);
+            }
+
+            &:focus {
+                border-color: var(--hbs-primary);
+                box-shadow: 0 0 0 3px var(--hbo-ring);
+            }
+        }
+    }
+}
+
+// ========================================
+// Responsive
+// ========================================
+
+@media (max-width: 768px) {
+    .TrackerStats-grid {
+        gap: 15px;
+    }
+
+    .TrackerStats-item {
+        min-width: 70px;
+    }
+
+    .HomepageSection--original .TrackerStats-item {
+        min-width: 96px;
+        padding: 10px 10px 8px;
+    }
+
+    .AdvancedFilters-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .AdvancedFilters-field {
+        min-width: 100%;
+
+        &--right {
+            margin-left: 0;
+            min-width: 100%;
+        }
+    }
+}
+
+// ========================================
+// Override default Flarum styles when blocks active
+// ========================================
+
+.IndexPage {
+    .Hero {
+        &:empty {
+            display: none;
+        }
+    }
+}
+
+// ========================================
+// Mobile discussion list: right-column restack for non-thumb cases
+// ========================================
+// Fallback that applies whenever homepage-blocks is loaded (typically
+// always in production). When thumb-sliders is off, default Flarum on
+// mobile shows: tag inline in the main flow, count as a wide pill at
+// top:12 right:12, views as a pill at top:35 right:58 (FoF default).
+// We restack everything into a single right column with consistent
+// right alignment matching the order used in thumbs mode:
+//   tag (row 1) → stars (row 2, only if topic-rating loaded)
+//   → count (row 2 or 3) → views (row 3 or 4)
+//
+// Rows are 20px apart, anchored at top:14 from content. Items need
+// extra min-height since the natural height (~62px) is too short.
+@media (max-width: 767.98px) {
+    .DiscussionListItem-content:not(.has-ThumbSlider) {
+        // Tag at row 1 (always, when present)
+        .DiscussionListItem-info > .item-tags {
+            position: absolute;
+            right: 12px;
+            top: 14px;
+            margin: 0;
+            z-index: 1;
+        }
+
+        // Default Flarum mobile centers the count inside a 40px-wide
+        // stats column (align-items:center). That puts count's right
+        // edge 8px LEFT of where views lands (views uses right:12 of
+        // content directly). Shrink stats and align right so count
+        // and views right-edges match.
+        .DiscussionListItem-stats {
+            top: 34px !important;
+            right: 12px !important;
+            width: auto !important;
+            align-items: flex-end !important;
+        }
+
+        .DiscussionListItem-count {
+            background: transparent !important;
+            color: var(--muted-color);
+            padding: 0;
+            border-radius: 0;
+            font-size: 11px;
+            gap: 4px;
+            width: auto;
+
+            .icon {
+                display: inline-block !important;
+                width: 14px;
+                font-size: 11px;
+                text-align: center;
+                margin: 0;
+            }
+        }
+
+        // With views (no rating): tag(14), count(34), views(54)
+        &:has(.item-discussion-views):not(:has(.item-rating)) {
+            min-height: 80px;
+
+            .item-discussion-views {
+                top: 54px !important;
+                right: 12px !important;
+                bottom: auto !important;
+                background: transparent !important;
+                padding: 0 !important;
+                border-radius: 0 !important;
+                margin: 0 !important;
+                font-size: 11px !important;
+                width: auto !important;
+
+                .icon {
+                    width: 14px !important;
+                    font-size: 11px !important;
+                }
+            }
+        }
+    }
+}
