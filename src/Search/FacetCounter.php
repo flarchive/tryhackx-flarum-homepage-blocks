@@ -1,0 +1,268 @@
+<?php
+
+namespace TryHackX\HomepageBlocks\Search;
+
+use Flarum\Discussion\Search\DiscussionSearcher;
+use Flarum\Extension\ExtensionManager;
+use Flarum\Search\Database\DatabaseSearchState;
+use Flarum\Search\Filter\FilterManager;
+use Flarum\Search\SearchCriteria;
+use Flarum\Tags\Search\HideHiddenTagsFromAllDiscussionsPage;
+use Flarum\Tags\Tag;
+use Flarum\User\User;
+use Illuminate\Contracts\Cache\Repository as Cache;
+use Illuminate\Contracts\Container\Container;
+use Illuminate\Database\ConnectionInterface;
+use Illuminate\Support\Arr;
+
+/**
+ * Faceted tag counts for the Advanced Filters "Category" and "Resolution" lists.
+ *
+ * The lists used to show each tag's global `discussion_count`, which ignores every
+ * other active filter — pick a resolution, a time interval or a title and a
+ * category still claimed "(12)" while the list came back empty. Here each option's
+ * number is exactly what the discussion list returns when that option is picked
+ * together with all the OTHER active filters:
+ *
+ *   - category counts = discussions matching every filter except the category,
+ *     grouped by tag;
+ *   - resolution counts = the same, except the resolution.
+ *
+ * The filters are applied through the very same {@see FilterManager} set-up as
+ * core's DiscussionSearcher (core + Tags + this extension's title/user/interval
+ * filters, + anything other extensions registered), on the same
+ * `Discussion::whereVisibleTo($actor)` base query, so counts can't drift from the
+ * list and never include discussions the actor can't see.
+ */
+class FacetCounter
+{
+    /** Filters the Advanced Filters panel may send (besides the two tag facets). */
+    public const FILTER_KEYS = [
+        'title', 'user', 'dateInterval', 'ratingInterval',
+        // "More filters" (each one still checks its own admin switch when applied)
+        'mediaType', 'createdRange', 'activeRange', 'viewsRange', 'ratingRange', 'ratingCountRange',
+        'repliesRange', 'sizeRange', 'seasonsRange', 'episodesRange', 'yearRange', 'durationRange',
+        'imdbRange', 'filmwebRange', 'hasMagnet', 'steamRange', 'ratedRange', 'clicksRange', 'clicksTopRange',
+        'clickedRange',
+    ];
+
+    /** Seconds a result is cached (per guest-or-user + filter set). */
+    public const CACHE_TTL = 60;
+
+    public function __construct(
+        protected Container $container,
+        protected ConnectionInterface $db,
+        protected ExtensionManager $extensions,
+        protected Cache $cache
+    ) {
+    }
+
+    /**
+     * @param array<string, string> $filters  normalised by {@see normaliseFilters()}
+     * With $mediaTypes (the Type filter is on) the result also has
+     * `mediaType: {total, movie, series}` — the Type options' counts under every other
+     * filter, both tag picks included.
+     *
+     * @return array{category: array{total: int, counts: array<string, int>}, resolution: array{total: int, counts: array<string, int>}, mediaType?: array{total: int, movie: int, series: int}}
+     */
+    public function count(User $actor, array $filters, ?string $category, ?string $resolution, bool $mediaTypes = false): array
+    {
+        $compute = function () use ($actor, $filters, $category, $resolution, $mediaTypes) {
+            $visibleTags = Tag::query()->whereVisibleTo($actor)->pluck('id')->all();
+
+            $categoryFacet = $this->facet($actor, $this->withTags($filters, $resolution), $visibleTags);
+            $resolutionFacet = $category === $resolution
+                ? $categoryFacet
+                : $this->facet($actor, $this->withTags($filters, $category), $visibleTags);
+
+            $out = ['category' => $categoryFacet, 'resolution' => $resolutionFacet];
+            if ($mediaTypes) {
+                $out['mediaType'] = $this->mediaTypeFacet($actor, $this->withTags($filters, $category, $resolution));
+            }
+
+            return $out;
+        };
+
+        // Text searches are near-unique (and rate limited): caching them would only
+        // litter the cache with one-off entries. The tag / interval combinations
+        // every visitor of the homepage repeats are what's worth caching.
+        if (self::isHeavy($filters)) {
+            return $compute();
+        }
+
+        $key = 'tryhackx-homepage-blocks.facets.' . sha1(json_encode([
+            $actor->id ? (int) $actor->id : 'guest',
+            $filters,
+            $category,
+            $resolution,
+            $mediaTypes,
+        ]));
+
+        return $this->cache->remember($key, self::CACHE_TTL, $compute);
+    }
+
+    /**
+     * Keep only the known filters, as trimmed, length-capped strings; drop empties.
+     *
+     * @return array<string, string>
+     */
+    public static function normaliseFilters(mixed $raw): array
+    {
+        $out = [];
+        if (! is_array($raw)) {
+            return $out;
+        }
+
+        foreach (self::FILTER_KEYS as $key) {
+            $value = $raw[$key] ?? null;
+            if (is_string($value) && ($value = trim($value)) !== '' && $value !== '0') {
+                $out[$key] = mb_substr($value, 0, 100);
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * A tag slug from the request, or null for "all" / anything malformed.
+     */
+    public static function normaliseSlug(mixed $raw): ?string
+    {
+        if (! is_string($raw) || $raw === '' || $raw === 'all' || mb_strlen($raw) > 100) {
+            return null;
+        }
+
+        return $raw;
+    }
+
+    /** "More filters" ranges no index can serve (an expression / a GROUP BY over the click log). */
+    public const HEAVY_KEYS = ['steamRange', 'clicksRange', 'clicksTopRange', 'clickedRange'];
+
+    /**
+     * Does this filter set run expensive filters — the LIKE '%…%' title / user search
+     * (same 3-character threshold as TitleFilter / UserFilter) or one of HEAVY_KEYS?
+     * Those go through the rate limiter (and aren't cached).
+     */
+    public static function isHeavy(array $filters): bool
+    {
+        if (mb_strlen($filters['title'] ?? '') >= 3 || mb_strlen($filters['user'] ?? '') >= 3) {
+            return true;
+        }
+        foreach (self::HEAVY_KEYS as $key) {
+            if (($filters[$key] ?? '') !== '') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @return array{total: int, counts: array<string, int>}
+     */
+    protected function facet(User $actor, array $filters, array $visibleTagIds): array
+    {
+        $state = $this->filteredState($actor, $filters);
+
+        // A clone: total() below still needs the filtered query as it is.
+        $ids = (clone $state->getQuery()->toBase())->select('discussions.id');
+
+        $counts = $this->db->table('discussion_tag')
+            ->whereIn('discussion_id', $ids)
+            ->whereIn('tag_id', $visibleTagIds ?: [0])
+            ->groupBy('tag_id')
+            ->selectRaw('tag_id, COUNT(*) as aggregate')
+            ->pluck('aggregate', 'tag_id')
+            ->mapWithKeys(fn ($count, $tagId) => [(string) $tagId => (int) $count])
+            ->all();
+
+        return ['total' => $this->total($actor, $filters, $state), 'counts' => $counts];
+    }
+
+    /**
+     * The "All" figure — the list total with no tag picked on this facet.
+     */
+    protected function total(User $actor, array $filters, DatabaseSearchState $state): int
+    {
+        // With no filter at all, Tags leaves discussions that are only in hidden
+        // tags out of the "All discussions" list — mirror that. (The per-tag counts
+        // above don't: picking a tag switches that rule off for the list too.)
+        if (! $state->getActiveFilters() && class_exists(HideHiddenTagsFromAllDiscussionsPage::class)
+            && $this->extensions->isEnabled('flarum-tags')) {
+            $state = $this->filteredState($actor, $filters);
+            (new HideHiddenTagsFromAllDiscussionsPage())($state, new SearchCriteria($actor, $filters));
+        }
+
+        return (int) $state->getQuery()->toBase()->getCountForPagination();
+    }
+
+    /**
+     * @return array{total: int, movie: int, series: int}
+     */
+    protected function mediaTypeFacet(User $actor, array $filters): array
+    {
+        unset($filters['mediaType']);
+        $count = fn (array $f) => (int) $this->filteredState($actor, $f)->getQuery()->toBase()->getCountForPagination();
+
+        return [
+            // Same "All" figure as the list / the tag facets (hidden-tags rule included).
+            'total' => $this->total($actor, $filters, $this->filteredState($actor, $filters)),
+            'movie' => $count($filters + ['mediaType' => 'movie']),
+            'series' => $count($filters + ['mediaType' => 'series']),
+        ];
+    }
+
+    protected function filteredState(User $actor, array $filters): DatabaseSearchState
+    {
+        $state = new DatabaseSearchState($actor, false);
+        $state->setQuery($this->container->make(DiscussionSearcher::class)->getQuery($actor));
+
+        $this->filterManager()->apply($state, $filters);
+
+        return $state;
+    }
+
+    /**
+     * The discussion FilterManager exactly as core builds it for DiscussionSearcher
+     * (SearchServiceProvider::boot) — every filter registered through
+     * Extend\SearchDriver included — since that instance itself isn't reachable.
+     *
+     * Those registries are core internals. Should a future core rename or reshape them, fail
+     * loudly (a logged error; the list shows no counts) instead of counting without the
+     * filters — plausible-looking but wrong numbers.
+     */
+    protected function filterManager(): FilterManager
+    {
+        $filters = $this->container->bound('flarum.search.filters')
+            ? Arr::get($this->container->make('flarum.search.filters'), DiscussionSearcher::class)
+            : null;
+        if (!is_array($filters) || $filters === []) {
+            throw new \RuntimeException('Facet counts: no discussion filters registered under flarum.search.filters (core internals changed?)');
+        }
+
+        $fulltextClass = $this->container->bound('flarum.search.fulltext')
+            ? Arr::get($this->container->make('flarum.search.fulltext'), DiscussionSearcher::class)
+            : null;
+        $manager = new FilterManager($fulltextClass ? $this->container->make($fulltextClass) : null);
+
+        foreach ($filters as $filter) {
+            $manager->add($this->container->make($filter));
+        }
+
+        return $manager;
+    }
+
+    /**
+     * Add the picked tag(s) (the other facet's selection) to the filters, the way the
+     * frontend does for the list (`filter[tag][]=slug`).
+     */
+    protected function withTags(array $filters, ?string ...$slugs): array
+    {
+        $slugs = array_values(array_unique(array_filter($slugs, fn ($s) => $s !== null)));
+        if ($slugs) {
+            $filters['tag'] = $slugs;
+        }
+
+        return $filters;
+    }
+}
