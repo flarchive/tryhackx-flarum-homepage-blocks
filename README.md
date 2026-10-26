@@ -2,13 +2,24 @@
 
 > **Read-only archive of released versions of tryhackx/flarum-homepage-blocks.** Not for installation: use [Packagist](https://packagist.org/packages/tryhackx/flarum-homepage-blocks) or the [upstream repository](https://github.com/TryHackX/flarum-homepage-blocks).
 
-**0** versions archived · Latest: [`2.10.0`](https://github.com/flarchive/tryhackx-flarum-homepage-blocks/tree/archive/v2.10.0) · License: `MIT` · Flarum: `^2.0.2`
+**11** versions archived · Latest: [`2.10.0`](https://github.com/flarchive/tryhackx-flarum-homepage-blocks/tree/archive/v2.10.0) · License: `MIT` · Flarum: `^2.0.2`
 
 ## Archived Versions
 
 | Version | Released | Flarum | Source |
 |---|---|---|---|
-| — | — | — | — |
+| `1.0.3` | 2026-04-23 | `^1.0.0` | [Browse](https://github.com/flarchive/tryhackx-flarum-homepage-blocks/tree/archive/v1.0.3) |
+| `2.6.1` | 2026-08-18 | `^2.0.0-rc.1` | [Browse](https://github.com/flarchive/tryhackx-flarum-homepage-blocks/tree/archive/v2.6.1) |
+| `2.6.2` | 2026-08-18 | `^2.0.0-rc.1` | [Browse](https://github.com/flarchive/tryhackx-flarum-homepage-blocks/tree/archive/v2.6.2) |
+| `2.6.3` | 2026-08-18 | `^2.0.0-rc.1` | [Browse](https://github.com/flarchive/tryhackx-flarum-homepage-blocks/tree/archive/v2.6.3) |
+| `2.7.0` | 2026-10-13 | `^2.0.0-rc.1` | [Browse](https://github.com/flarchive/tryhackx-flarum-homepage-blocks/tree/archive/v2.7.0) |
+| `2.8.0` | 2026-10-13 | `^2.0.0-rc.1` | [Browse](https://github.com/flarchive/tryhackx-flarum-homepage-blocks/tree/archive/v2.8.0) |
+| `2.8.1` | 2026-10-13 | `^2.0.0-rc.1` | [Browse](https://github.com/flarchive/tryhackx-flarum-homepage-blocks/tree/archive/v2.8.1) |
+| `2.8.2` | 2026-10-13 | `^2.0.0-rc.1` | [Browse](https://github.com/flarchive/tryhackx-flarum-homepage-blocks/tree/archive/v2.8.2) |
+| `2.9.1` | 2026-10-20 | `^2.0.2` | [Browse](https://github.com/flarchive/tryhackx-flarum-homepage-blocks/tree/archive/v2.9.1) |
+| `2.9.2` | 2026-10-21 | `^2.0.2` | [Browse](https://github.com/flarchive/tryhackx-flarum-homepage-blocks/tree/archive/v2.9.2) |
+
+[View all 11 versions](https://github.com/flarchive/tryhackx-flarum-homepage-blocks/tags)
 
 Catalog entry: [packages/tryhackx-flarum-homepage-blocks.json](https://github.com/flarchive/archive-index/blob/main/packages/tryhackx-flarum-homepage-blocks.json)
 
